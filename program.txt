@@ -1,0 +1,2 @@
+DEF fac == dup 0 = [ drop 1 ] [ dup 1 - fac * ] ifte .
+5 fac println

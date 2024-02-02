@@ -1,0 +1,3 @@
+*.rom*
+*.tal
+__pycache__
