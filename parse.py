@@ -1,8 +1,9 @@
 from nodes import *
 from zipper import Zipper
+from collections import deque
 
 def lex(src):
-    return [i for i in src.replace('[', ' [ ').replace(']', ' ] ').split() if i != '']
+    return deque([i for i in src.replace('[', ' [ ').replace(']', ' ] ').split() if i != ''])
 
 class ParseError(Exception):
     pass
@@ -10,12 +11,20 @@ class ParseError(Exception):
 def parse(src):
     tokens = lex(src)
     z = make_zipper(Source([]))
-    for t in tokens:
+    while len(tokens) > 0:
+        t = tokens.popleft()
         if t == 'DEF':
             if not isinstance(z.node(), Source):
                 raise ParseError('Definitions must be at top level')
             z.append_child(Definition([]))
             z.down().rightmost()
+            t = tokens.popleft()
+            if not t[0].isalpha():
+                raise ParseError(f'Invalid definition name: {t}')
+            z.append_child(Word(t))
+            t = tokens.popleft()
+            if t != '==':
+                raise ParseError("Expected '==' after definition name")
         elif t == '.':
             if not isinstance(z.node(), Definition):
                 raise ParseError("unexpected '.'")
