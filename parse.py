@@ -18,10 +18,14 @@ def parse(src):
                 raise ParseError('Definitions must be at top level')
             z.append_child(Definition([]))
             z.down().rightmost()
+            if len(tokens) == 0:
+                raise ParseError('unterminated definition')
             t = tokens.popleft()
             if not t[0].isalpha():
                 raise ParseError(f'Invalid definition name: {t}')
             z.append_child(Word(t))
+            if len(tokens) == 0:
+                raise ParseError(f"unterminated definition for '{t}'")
             t = tokens.popleft()
             if t != '==':
                 raise ParseError("Expected '==' after definition name")
