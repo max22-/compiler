@@ -111,6 +111,7 @@ class Zipper:
         else:
             self.up()
             self.focus = self._make_node(self.focus, [])
+        return self
     
     def append_child(self, c):
         if not self._is_branch(self.focus):

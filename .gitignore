@@ -1,3 +1,4 @@
 *.rom*
 *.tal
 __pycache__
+*.ini

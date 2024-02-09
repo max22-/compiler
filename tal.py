@@ -13,3 +13,22 @@ header = """
 |c0 @DateTime   &year   $2 &month    $1 &day    $1 &hour   $1 &minute $1 &second  $1 &dotw    $1 &doty   $2 &isdst $1
 
 """
+
+print_short = """
+@print-short-decimal ( short* -- )
+	#03e8 DIV2k
+		DUP ,print-byte-decimal/second JSR
+		MUL2 SUB2
+	#0064 DIV2k
+		DUP ,print-byte-decimal/third JSR
+		MUL2 SUB2
+	NIP ,print-byte-decimal/second JMP
+
+@print-byte-decimal ( byte -- )
+	#64 DIVk DUP #30 ADD .Console/write DEO MUL SUB
+	&second
+	#0a DIVk DUP #30 ADD .Console/write DEO MUL SUB
+	&third
+	             #30 ADD .Console/write DEO
+	JMP2r
+"""

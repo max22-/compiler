@@ -1,0 +1,10 @@
+DEF fib == 
+    dup 0 = 
+    [ ] 
+    [
+        dup 1 =
+        [ ]
+        [ dup 1 - fib swap 2 - fib + ]
+        ifte
+] ifte .
+10 fib print-short

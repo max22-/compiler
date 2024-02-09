@@ -1,15 +1,6 @@
 from zipper import Zipper, ZipperError
-from nodes import make_zipper, Quotation, Definition, Word
-
-global_env = {
-    "println": None,
-    "dup": None,
-    "=": None,
-    "ifte": None,
-    "drop": None,
-    "-": None,
-    "*": None,
-}
+from nodes import *
+from code_generator import builtins
 
 class ASTError(Exception):
     pass
@@ -28,7 +19,6 @@ def check_duplicates(ast):
                 definitions.append(name)
             z.right()
     except ZipperError:
-        print(f"definitions = {definitions}")
         return True
     
 def lift_quotations(ast):
@@ -39,30 +29,37 @@ def lift_quotations(ast):
     while not z.is_root():
         n = z.node()
         if isinstance(n, Quotation):
-            name = Word(f'_quotation{counter}')
-            quotations.append(Definition([name] + n.children()))
-            z.edit(lambda n: name)
+            name = f'quotation{counter}'
+            quotations.append(Definition([Word(name)] + n.children()))
+            z.edit(lambda n: LiftedQuotation(name))
             counter += 1
         z.post_order_next()
     z.top()
     for q in quotations:
         z.append_child(q)
 
+# TODO: use 'down' instead of post_order
 def move_definitions_at_end(ast):
     z = make_zipper(ast)
     definitions = []
-    z.post_order_next(start=True)
-    while not z.is_root():
-        n = z.node()
-        if isinstance(n, Definition):
-            definitions.append(n)
-            z.remove()
-        else:
-            z.post_order_next()
+    main = []
+    z.down()
+    try:
+        while True:
+            n = z.node()
+            if isinstance(n, Definition):
+                definitions.append(n)
+            else:
+                main.append(n)
+            z.remove().top().down()
+    except ZipperError:
+        pass
     z.top()
+    z.append_child(Main(main))
     for d in definitions:
         z.append_child(d)
 
+# TODO: use 'down' instead of post_order
 def definitions_list(ast):
     z = make_zipper(ast)
     definitions = []
@@ -75,20 +72,22 @@ def definitions_list(ast):
     return definitions
 
 def check_undefined_words(ast):
-    print(f"ast: {ast}")
     definitions = definitions_list(ast)
     z = make_zipper(ast)
-    print(z)
     z.post_order_next(True)
     while not z.is_root():
         n = z.node()
         if isinstance(n, Word):
-            print(n)
-            if (not n.val in definitions) and (not n.val in global_env.keys()):
+            name = n.val
+            if (not name in definitions) and (not name in builtins.keys()):
                 raise ASTError(f"'{n.val}' undefined")
         z.post_order_next()
 
 
 def process(ast):
     check_duplicates(ast)
+    lift_quotations(ast)
+    move_definitions_at_end(ast)
+    check_undefined_words(ast)
+    # TODO: removed unused definitions
     return ast

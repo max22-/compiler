@@ -10,6 +10,10 @@ class Atom(Program):
 class Word(Atom):
     def __str__(self):
         return self.val
+    
+class LiftedQuotation(Atom):
+    def __str__(self):
+        return self.val
 
 class Integer(Atom):
     def __str__(self):
@@ -36,6 +40,10 @@ class Definition(Composite):
 class Quotation(Composite):
     def __str__(self):
         return 'Q' + super().__str__()
+    
+class Main(Composite):
+    def __str__(self):
+        return 'M' + super().__str__()
 
 class Source(Composite):
     def __str__(self):
