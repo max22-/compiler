@@ -38,7 +38,6 @@ def lift_quotations(ast):
     for q in quotations:
         z.append_child(q)
 
-# TODO: use 'down' instead of post_order
 def move_definitions_at_end(ast):
     z = make_zipper(ast)
     definitions = []
